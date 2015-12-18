@@ -1,6 +1,7 @@
 package bouncespy
 
 import (
+	"fmt"
 	"net/mail"
 	"strconv"
 	"strings"
@@ -160,6 +161,73 @@ var StatusMap = map[BounceReason]struct {
 	UndefinedCode:                            {Hard, true},
 }
 
+var reasonDescriptions = map[BounceReason]string{
+	ServiceNotAvailable:               "service not available",
+	MailActionNotTaken:                "mail action not taken: mailbox unavailable",
+	ActionAbortedErrorProcessing:      "action aborted: error in processing",
+	ActionAbortedInsufficientStorage:  "action aborted: insufficient system storage",
+	CmdSyntaxError:                    "the server could not recognize the command due to a syntax error",
+	ArgumentsSyntaxError:              "a syntax error was encountered in command arguments",
+	CmdNotImplemented:                 "this command is not implemented",
+	BadCmdSequence:                    "the server has encountered a bad sequence of commands",
+	CmdParamNotImplemented:            "a command parameter is not implemented",
+	MailboxUnavailable:                "user's mailbox was unavailable (such as not found)",
+	RecipientNotLocal:                 "the recipient is not local to the server",
+	ActionAbortedExceededStorageAlloc: "the action was aborted due to exceeded storage allocation",
+	MailboxNameInvalid:                "the command was aborted because the mailbox name is invalid",
+	TransactionFailed:                 "the transaction failed for some unstated reason",
+
+	AddressDoesntExist:                       "address does not exist",
+	OtherAddressError:                        "other address status",
+	BadDestinationMailboxAddress:             "bad destination mailbox address",
+	BadDestinationSystemAddress:              "bad destination system address",
+	BadDestinationMailboxAddressSyntax:       "bad destunation mailbox address syntax",
+	DestinationMailboxAmbiguous:              "destination mailbox address ambiguous",
+	DestinationMailboxAddressInvalid:         "destination mailbox address invalid",
+	MailboxMoved:                             "mailbox has moved",
+	BadSenderMailboxAddressSyntax:            "bad sender's mailbox address syntax",
+	BadSenderSystemAddress:                   "bad sender's system address",
+	UndefinedMailboxError:                    "other or undefined mailbox status",
+	MailboxDisabled:                          "mailbox disabled, not accepting messages",
+	MailboxFull:                              "mailbox full",
+	MessageLenExceedsLimit:                   "message length exceeds administrative limit",
+	MailingListExpansionProblem:              "mailing list expansion problem",
+	UndefinedMailSystemStatus:                "other or undefined mail system status",
+	MailSystemFull:                           "mail system full",
+	SystemNotAcceptingNetworkMessages:        "system not accepting network messages",
+	SystemNotCapableOfFeatures:               "system not capable of selected features",
+	MessageTooBigForSystem:                   "message too big for system",
+	UndefinedNetworkStatus:                   "other or undefined network or routing status",
+	NoAnswerFromHost:                         "no answer from host",
+	BadConnection:                            "bad connection",
+	RoutingServerFailure:                     "routing server failure",
+	UnableToRoute:                            "unable to route",
+	NetworkCongestion:                        "network congestion",
+	RoutingLoopDetected:                      "routing loop detected",
+	DeliveryTimeExpired:                      "delivery time expired",
+	UndefinedProtocolStatus:                  "other or undefined protocol status",
+	InvalidCommand:                           "invalid command",
+	SyntaxError:                              "syntax error",
+	TooManyRecipients:                        "too many recipients",
+	InvalidCommandArguments:                  "invalid command arguments",
+	WrongProtocolVersion:                     "wrong protocol version",
+	UndefinedMediaError:                      "other or undefined media error",
+	MediaNotSupported:                        "media not supported",
+	ConversionRequiredAndProhibited:          "conversion required and prohibited",
+	ConversionRequiredButNotSupported:        "conversion required but not supported",
+	ConversionWithLossPerformed:              "conversion with loss performed",
+	ConversionFailed:                         "conversion failed",
+	UndefinedSecurityStatus:                  "other or undefined security status",
+	MessageRefused:                           "delivery not authorized, message refused",
+	MailingListExpansionProhibited:           "mailing list expansion prohibited",
+	SecurityConversionRequiredButNotPossible: "security conversion required but nor possible",
+	SecurityFeaturesNotSupported:             "security features not supported",
+	CryptoFailure:                            "cryptographic failure",
+	CryptoAlgorithmNotSupported:              "cryptographic algorithm not supported",
+	MessageIntegrityFailure:                  "message integrity failure",
+	UndefinedCode:                            "hard bounce with no bounce code found",
+}
+
 const (
 	LessSpecific = -1
 	MoreSpecific = 1
@@ -189,6 +257,20 @@ func (r BounceReason) Compare(o BounceReason) int {
 	} else {
 		return LessSpecific
 	}
+}
+
+// String returns the status code of the reason plus the human
+// readable description of it
+func (r BounceReason) String() string {
+	if r == NotFound {
+		return "no bounce reason found"
+	}
+
+	return fmt.Sprintf(
+		"%s - %s",
+		string(r),
+		reasonDescriptions[r],
+	)
 }
 
 // Result is the returned value of the analysis. It contains the bounce type, the reason,
