@@ -326,6 +326,7 @@ func FindBounceReason(body []byte) BounceReason {
 	}
 
 	for i, line := range lines {
+		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "status:") {
 			if reason := analyzeLine(line[6:]); reason != NotFound {
 				return reason
@@ -375,5 +376,13 @@ func parseStatus(status string) BounceReason {
 }
 
 func removeUnnecessaryChars(line string) string {
-	return strings.Replace(strings.Replace(strings.Replace(line, "-", " ", -1), "  ", " ", -1), "  ", " ", -1)
+	return removeSpaces(removeSpaces(removeDashes(line)))
+}
+
+func removeDashes(line string) string {
+	return strings.Replace(line, "-", " ", -1)
+}
+
+func removeSpaces(line string) string {
+	return strings.Replace(line, "  ", " ", -1)
 }
