@@ -307,9 +307,11 @@ func SpamScore(headers mail.Header) float64 {
 }
 
 const (
-	errorOtherServerReturned = "the error that the other server returned was:"
-	reasonOfTheProblem       = "the reason of the problem:"
-	reasonForTheProblem      = "the reason for the problem:"
+	errorOtherServerReturned  = "the error that the other server returned was:"
+	reasonOfTheProblem        = "the reason of the problem:"
+	reasonForTheProblem       = "the reason for the problem:"
+	deliveryFailedPermanently = "delivery to the following recipient failed permanently:"
+	deliveryDelayed           = "delivery to the following recipient has been delayed:"
 )
 
 // FindBounceReason returns the bounce reason found in the body of the email if it was found
@@ -326,6 +328,14 @@ func FindBounceReason(body []byte) BounceReason {
 	}
 
 	for i, line := range lines {
+		if strings.HasPrefix(line, deliveryDelayed) {
+			return ServiceNotAvailable
+		}
+
+		if strings.HasPrefix(line, deliveryFailedPermanently) {
+			return UndefinedCode
+		}
+
 		line = strings.TrimSpace(line)
 		if strings.HasPrefix(line, "status:") {
 			if reason := analyzeLine(line[6:]); reason != NotFound {
